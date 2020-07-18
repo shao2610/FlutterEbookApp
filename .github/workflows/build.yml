@@ -7,17 +7,6 @@ on:
   watch:
     types: [started]
 jobs:
-  build-ios:
-    name: Build iOS app
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '1.17.3'
-          channel: 'stable'
-      - run: flutter pub get
-      - run: flutter build ios --no-codesign
   build-android:
     name: Build Android app
     runs-on: ubuntu-latest
@@ -28,9 +17,13 @@ jobs:
           java-version: '12.x'
       - uses: subosito/flutter-action@v1
         with:
-          flutter-version: '1.17.3'
+          flutter-version: '1.17.5'
           channel: 'stable'
       - run: flutter pub get
       - run: flutter build apk
-      - run:  curl -sL https://git.io/file-transfer | sh
-      - run:  ./transfer bit build/app/outputs/apk/release/app-release.apk
+      - name: Upload to release
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: build/app/outputs/apk/release/app-release.apk application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
